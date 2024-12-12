@@ -76,7 +76,7 @@ For more details about the output files and reports, please refer to the
 
 ## Credits
 
-nf-core/deepmodeloptim was originally written by Mathys Grappote.
+nf-core/deepmodeloptim was originally written by Mathys Grapotte.
 
 We thank the following people for their extensive assistance in the development of this pipeline:
 
