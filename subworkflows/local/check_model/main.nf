@@ -30,6 +30,8 @@ workflow CHECK_MODEL_WF {
         ch_model_config,
         ch_initial_weights
     )
+    emit:
+    CHECK_MODEL.out
 }
 
 /*

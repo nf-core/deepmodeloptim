@@ -113,6 +113,8 @@ workflow DEEPMODELOPTIM {
     // // ==============================================================================
     // // Tune model
     // // ==============================================================================
+    // Create dependancy WF dependency to ensure TUNE_WF runs after CHECK_MODEL_WF finished
+    ch_transformed_data = CHECK_MODEL_WF.out.concat(ch_transformed_data)
 
     TUNE_WF(
         ch_transformed_data,
