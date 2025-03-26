@@ -31,7 +31,7 @@ include { GAWK as CENTER_AROUND_PEAK                        } from '../../../mod
 include { AWK_EXTRACT as EXTRACT_FOREGROUND                 } from '../../../modules/local/awk/extract'
 include { AWK_EXTRACT as EXTRACT_BACKGROUND_ALIENS          } from '../../../modules/local/awk/extract'
 include { BEDTOOLS_SHIFT as EXTRACT_BACKGROUND_SHADE        } from '../../../modules/nf-core/bedtools/shift'
-include { BEDTOOLS_SHUFFLE as EXTRACT_BACKGROUND_SHUFFLE    } from '../../../modules/local/bedtools/shuffle'
+include { BEDTOOLS_SHUFFLE as EXTRACT_BACKGROUND_SHUFFLE    } from '../../../modules/nf-core/bedtools/shuffle'
 include { BEDTOOLS_SUBTRACT                                 } from '../../../modules/nf-core/bedtools/subtract'
 include { BEDTOOLS_GETFASTA as BEDTOOLS_GETFASTA_FOREGROUND } from '../../../modules/nf-core/bedtools/getfasta'
 include { BEDTOOLS_GETFASTA as BEDTOOLS_GETFASTA_BACKGROUND } from '../../../modules/nf-core/bedtools/getfasta'
@@ -138,7 +138,9 @@ workflow PREPROCESS_IBIS_BEDFILE_TO_STIMULUS {
 
     EXTRACT_BACKGROUND_SHUFFLE(
         ch_background_to_extract.shuffle,
-        ch_genome_sizes.collect()
+        ch_genome_sizes.collect(),
+        [],
+        []
     )
     ch_background_shuffle = EXTRACT_BACKGROUND_SHUFFLE.out.bed
 
