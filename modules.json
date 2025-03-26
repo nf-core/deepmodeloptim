@@ -15,6 +15,11 @@
                         "git_sha": "81880787133db07d9b4c1febd152c090eb8325dc",
                         "installed_by": ["modules"]
                     },
+                    "bedtools/shuffle": {
+                        "branch": "master",
+                        "git_sha": "788825f9e429b03b892a1fbe7e8d25cce909a998",
+                        "installed_by": ["modules"]
+                    },
                     "bedtools/slop": {
                         "branch": "master",
                         "git_sha": "81880787133db07d9b4c1febd152c090eb8325dc",
