@@ -25,6 +25,11 @@
                         "git_sha": "81880787133db07d9b4c1febd152c090eb8325dc",
                         "installed_by": ["modules"]
                     },
+                    "csvtk/concat": {
+                        "branch": "master",
+                        "git_sha": "fa92936611247ca647ddee970f94d83f1bcb0ffe",
+                        "installed_by": ["modules"]
+                    },
                     "custom/getchromsizes": {
                         "branch": "master",
                         "git_sha": "81880787133db07d9b4c1febd152c090eb8325dc",

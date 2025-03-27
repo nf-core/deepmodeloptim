@@ -97,8 +97,38 @@ workflow PIPELINE_INITIALISATION {
     //
     ch_genome = params.genome == null ?
         Channel.of([[],[]]) :
-        Channel.fromPath(params.genomes[params.genome]['fasta'], checkIfExists: true)
-            .map { it -> [[id:params.genome], it]}
+        (
+            params.genome in params.genomes ?
+            Channel.fromPath(params.genomes[params.genome]['fasta'], checkIfExists: true) :
+            Channel.fromPath(params.genome, checkIfExists: true)
+        )
+        .map { it -> [[id:params.genome], it]}
+
+
+    //
+    // Create channels with values for tuning range
+    //
+
+    range = validate_range(params.tune_trials_range)
+    val_tune_trials_range = Channel.from(range)
+                                .map { rangeStr ->
+                                    def (min, max, step) = rangeStr.tokenize(',')*.toInteger()
+                                    (min..max).step(step).toList()
+                                }
+                                .flatten()
+    //
+    // Create the channels for the number of replicates
+    //
+    ch_tune_replicates = Channel.from(1..params.tune_replicates)
+
+    //
+    // Create the channels for the prediction data
+    //
+    ch_prediction_data = params.prediction_data == null ?
+            Channel.empty() :
+            Channel.fromPath(params.prediction_data, checkIfExists: true)
+                .map { it -> [[id:it.baseName], it]}
+
 
     emit:
     data                 = ch_data
@@ -108,6 +138,9 @@ workflow PIPELINE_INITIALISATION {
     initial_weights      = ch_initial_weights
     preprocessing_config = ch_preprocessing_config
     genome               = ch_genome
+    tune_trials_range    = val_tune_trials_range
+    tune_replicates      = ch_tune_replicates
+    prediction_data      = ch_prediction_data
     versions             = ch_versions
 }
 
@@ -177,6 +210,26 @@ def validateInputSamplesheet(input) {
 
     return [ metas[0], fastqs ]
 }
+
+//
+// Validate range
+//
+def validate_range(range) {
+
+    if (range == null) {
+        return "1,1,1"
+    }
+    def (min, max, step) = range.tokenize(',')*.toInteger()
+    if (min > max) {
+        error("Invalid range: min value is greater than max value: ${range}")
+    }
+    if (step <= 0) {
+        error("Invalid range: step value must be greater than 0: ${range}")
+    }
+
+    return range
+}
+
 //
 // Generate methods description for MultiQC
 //

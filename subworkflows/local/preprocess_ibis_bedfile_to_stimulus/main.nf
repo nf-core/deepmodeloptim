@@ -48,6 +48,7 @@ workflow PREPROCESS_IBIS_BEDFILE_TO_STIMULUS {
     main:
 
     // TODO: it would be nice to check that the input file is actually a bed file
+    ch_versions = Channel.empty()
 
     // ==============================================================================
     // align peaks
@@ -68,6 +69,7 @@ workflow PREPROCESS_IBIS_BEDFILE_TO_STIMULUS {
         ch_awk_program
     )
     ch_input = CENTER_AROUND_PEAK.out.output
+    ch_versions = ch_versions.mix(CENTER_AROUND_PEAK.out.versions)
 
     // ==============================================================================
     // extract foreground
@@ -88,6 +90,7 @@ workflow PREPROCESS_IBIS_BEDFILE_TO_STIMULUS {
         ch_input.collect()
     )
     ch_foreground = EXTRACT_FOREGROUND.out.extracted_data
+    ch_versions = ch_versions.mix(EXTRACT_FOREGROUND.out.versions)
 
     // ==============================================================================
     // extract background
@@ -106,6 +109,7 @@ workflow PREPROCESS_IBIS_BEDFILE_TO_STIMULUS {
         ch_input.collect()
     )
     ch_background_aliens = EXTRACT_BACKGROUND_ALIENS.out.extracted_data
+    ch_versions = ch_versions.mix(EXTRACT_BACKGROUND_ALIENS.out.versions)
 
     // create input channel for shade and shuffle
     // as they use the same input structure
@@ -132,6 +136,7 @@ workflow PREPROCESS_IBIS_BEDFILE_TO_STIMULUS {
         ch_genome_sizes.collect()
     )
     ch_background_shade = EXTRACT_BACKGROUND_SHADE.out.bed
+    ch_versions = ch_versions.mix(EXTRACT_BACKGROUND_SHADE.out.versions)
 
     // extract background - shuffle
     // this option creates a background with randomly shuffled peaks
@@ -141,6 +146,7 @@ workflow PREPROCESS_IBIS_BEDFILE_TO_STIMULUS {
         ch_genome_sizes.collect()
     )
     ch_background_shuffle = EXTRACT_BACKGROUND_SHUFFLE.out.bed
+    ch_versions = ch_versions.mix(EXTRACT_BACKGROUND_SHUFFLE.out.versions)
 
     // merge different background if needed
     // TODO: implement this
@@ -164,6 +170,7 @@ workflow PREPROCESS_IBIS_BEDFILE_TO_STIMULUS {
 
     BEDTOOLS_SUBTRACT(ch_background_with_foreground)
     ch_background = BEDTOOLS_SUBTRACT.out.bed
+    ch_versions = ch_versions.mix(BEDTOOLS_SUBTRACT.out.versions)
 
     // ==============================================================================
     // extract fasta sequences
@@ -175,11 +182,13 @@ workflow PREPROCESS_IBIS_BEDFILE_TO_STIMULUS {
         ch_foreground,
         ch_genome.map{it[1]}.collect()
     )
+    ch_versions = ch_versions.mix(BEDTOOLS_GETFASTA_FOREGROUND.out.versions)
 
     BEDTOOLS_GETFASTA_BACKGROUND(
         ch_background,
         ch_genome.map{it[1]}.collect()
     )
+    ch_versions = ch_versions.mix(BEDTOOLS_GETFASTA_BACKGROUND.out.versions)
 
     ch_foreground = BEDTOOLS_GETFASTA_FOREGROUND.out.fasta
     ch_background = BEDTOOLS_GETFASTA_BACKGROUND.out.fasta
@@ -202,7 +211,9 @@ workflow PREPROCESS_IBIS_BEDFILE_TO_STIMULUS {
         ch_input_for_formatting,
         ch_awk_program.collect()
     )
+    ch_versions = ch_versions.mix(BACKGROUND_FOREGROUND_TO_STIMULUS_CSV.out.versions)
 
     emit:
     data = BACKGROUND_FOREGROUND_TO_STIMULUS_CSV.out.output
+    versions = ch_versions
 }
