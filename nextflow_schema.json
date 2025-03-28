@@ -2,7 +2,7 @@
     "$schema": "https://json-schema.org/draft/2020-12/schema",
     "$id": "https://raw.githubusercontent.com/nf-core/deepmodeloptim/master/nextflow_schema.json",
     "title": "nf-core/deepmodeloptim pipeline parameters",
-    "description": "nf-core/deepmodeloptim is an end-to-end nextflow based pipeline for statistically testing training procedures of machine learning models",
+    "description": "nf-core/deepmodeloptim is an end-to-end pipeline designed to facilitate the testing and development of deep learning models for genomics.",
     "required": ["data", "data_config", "model", "model_config", "outdir"],
     "type": "object",
     "$defs": {
@@ -52,6 +52,7 @@
                 },
                 "save_data": {
                     "type": "boolean",
+                    "description": "flag to save transformed csv data.If set to true, the transformed data will be saved in the output directory.",
                     "help_text": "flag to save transformed csv data."
                 },
                 "email": {
@@ -79,6 +80,74 @@
                 }
             }
         },
+        "preprocessing_options": {
+            "title": "Preprocessing options",
+            "type": "object",
+            "description": "Options for preprocessing the data",
+            "default": "",
+            "fa_icon": "fas fa-terminal",
+            "properties": {
+                "preprocessing_config": {
+                    "type": "string",
+                    "description": "Preprocessing config YAML",
+                    "fa_icon": "fas fa-folder-open",
+                    "help_text": "the config file that specifies all the parameters relative to the data manipulation."
+                },
+                "genome": {
+                    "type": "string",
+                    "description": "Name of iGenomes reference.",
+                    "fa_icon": "fas fa-book",
+                    "help_text": "If using a reference genome configured in the pipeline using iGenomes (not recommended), use this parameter to give the ID for the reference. This is then used to build the full paths for all required reference genome files e.g. `--genome GRCh38`. \n\nSee the [nf-core website docs](https://nf-co.re/usage/reference_genomes) for more details."
+                },
+                "igenomes_base": {
+                    "type": "string",
+                    "format": "directory-path",
+                    "description": "The base path to the igenomes reference files",
+                    "fa_icon": "fas fa-ban",
+                    "hidden": true,
+                    "default": "s3://ngi-igenomes/igenomes/"
+                },
+                "bed_peak_size": {
+                    "type": "integer",
+                    "description": "Size of the peak extracted from the BED file",
+                    "default": 300,
+                    "help_text": "the size of the peak extracted from the BED file."
+                }
+            }
+        },
+        "tuning_options": {
+            "title": "Tuning options",
+            "type": "object",
+            "description": "Options for tuning the model",
+            "properties": {
+                "tune_trials_range": {
+                    "type": "string",
+                    "description": "Range of trials for the tuning. Defined as min,max,step.",
+                    "default": null,
+                    "help_text": "the range of trials for the tuning. Defined as min,max,step. e.g. 5,10,5. If not provided the value will be extracted from the provided stimulus config."
+                },
+                "tune_replicates": {
+                    "type": "integer",
+                    "description": "Number of replicates for the tuning.",
+                    "default": 1,
+                    "help_text": "the number of replicates for the tuning, that is how many times the tuning with the same model is run on the same data."
+                }
+            }
+        },
+        "evaluation_options": {
+            "title": "Evaluation options",
+            "type": "object",
+            "description": "Options for evaluating the model",
+            "properties": {
+                "prediction_data": {
+                    "type": "string",
+                    "description": "Prediction data CSV file",
+                    "fa_icon": "fas fa-folder-open",
+                    "mimetype": "tesxt/csv",
+                    "help_text": "the input file containing all input data for the prediction."
+                }
+            }
+        },
         "resources_options": {
             "title": "Resources options",
             "type": "object",
@@ -91,6 +160,12 @@
                     "minimum": 0,
                     "help_text": "requesting the gpus for the tuning steps.",
                     "description": "set maximum GPU limit"
+                },
+                "container_dev": {
+                    "type": "string",
+                    "default": null,
+                    "help_text": "Container for development stage.",
+                    "description": "Container for development stage"
                 }
             }
         },
@@ -271,7 +346,16 @@
             "$ref": "#/$defs/input_output_options"
         },
         {
+            "$ref": "#/$defs/preprocessing_options"
+        },
+        {
             "$ref": "#/$defs/optional_inputs"
+        },
+        {
+            "$ref": "#/$defs/evaluation_options"
+        },
+        {
+            "$ref": "#/$defs/tuning_options"
         },
         {
             "$ref": "#/$defs/resources_options"
@@ -288,21 +372,5 @@
         {
             "$ref": "#/$defs/generic_options"
         }
-    ],
-    "properties": {
-        "preprocessing_config": {
-            "type": "string"
-        },
-        "genome": {
-            "type": "string"
-        },
-        "igenomes_base": {
-            "type": "string",
-            "default": "s3://ngi-igenomes/igenomes"
-        },
-        "bed_peak_size": {
-            "type": "integer",
-            "default": 300
-        }
-    }
+    ]
 }

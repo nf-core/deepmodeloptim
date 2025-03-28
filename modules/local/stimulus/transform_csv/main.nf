@@ -4,7 +4,7 @@ process STIMULUS_TRANSFORM_CSV {
     tag "${meta.id}-${meta2.id}"
     label 'process_medium'
     // TODO: push image to nf-core quay.io
-    container "docker.io/mathysgrapotte/stimulus-py:0.3.0.dev"
+    container "docker.io/mathysgrapotte/stimulus-py:dev"
 
     input:
     tuple val(meta), path(data)
@@ -12,6 +12,7 @@ process STIMULUS_TRANSFORM_CSV {
 
     output:
     tuple val(meta), path("${prefix}.csv"), emit: transformed_data
+    path "versions.yml"          , emit: versions
 
     script:
     prefix = task.ext.prefix ?: "${meta.id}-${meta2.id}-trans"

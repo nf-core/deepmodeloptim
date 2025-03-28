@@ -23,6 +23,9 @@ workflow CHECK_MODEL_WF {
     ch_initial_weights
 
     main:
+
+    ch_versions = Channel.empty()
+
     CHECK_MODEL(
         ch_data_config,
         ch_data,
