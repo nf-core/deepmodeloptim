@@ -18,8 +18,18 @@ process STIMULUS_COMPARE_TENSORS {
     """
     stimulus compare-tensors \
         ${tensors} \
-        -o "${prefix}_scores.csv" \
+        -o scores.csv \
         ${args}
+
+    # Extract first row of scores.csv
+    header_scores=\$(head -n 1 scores.csv)
+
+    # Add metadata info to output file
+    echo "${header},\$header_scores" > "${prefix}_scores.csv"
+
+    # Add values
+    scores=\$(awk 'NR==2  {sub(/[[:space:]]+\$/, "")} NR==2' scores.csv | tr -s '[:blank:]' ',')
+    echo "${values},\$scores" >> "${prefix}_scores.csv"
 
     cat <<-END_VERSIONS > versions.yml
     "${task.process}":

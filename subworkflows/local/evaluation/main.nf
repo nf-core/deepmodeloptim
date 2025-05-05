@@ -75,16 +75,11 @@ workflow EVALUATION_WF {
         }
         .flatMap { it }
 
-    //pairs.dump(tag: "pairs")
-
-
     STIMULUS_COMPARE_TENSORS_COSINE(
         pairs
     )
 
     cosine_scores = STIMULUS_COMPARE_TENSORS_COSINE.out.csv
-
-    cosine_scores.dump(tag: "cosine_scores")
 
     cosine_scores
     .map {
