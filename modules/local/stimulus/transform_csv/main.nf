@@ -11,7 +11,7 @@ process STIMULUS_TRANSFORM_CSV {
     tuple val(meta2), path(config)
 
     output:
-    tuple val(meta), path("${prefix}.csv"), emit: transformed_data
+    tuple val(meta), path("${prefix}"), emit: transformed_data
     path "versions.yml"          , emit: versions
 
     script:
@@ -20,7 +20,7 @@ process STIMULUS_TRANSFORM_CSV {
     stimulus transform-csv \
         -c ${data} \
         -y ${config} \
-        -o ${prefix}.csv
+        -o ${prefix}
 
     cat <<-END_VERSIONS > versions.yml
     "${task.process}":

@@ -16,6 +16,7 @@ include { SPLIT_CSV_WF                        } from '../subworkflows/local/spli
 include { TRANSFORM_CSV_WF                    } from '../subworkflows/local/transform_csv'
 include { TUNE_WF                             } from '../subworkflows/local/tune'
 include { EVALUATION_WF                       } from '../subworkflows/local/evaluation'
+include { ENCODE_CSV                          } from '../modules/local/stimulus/encode'
 
 //
 // MODULES: Consisting of nf-core/modules
@@ -149,6 +150,11 @@ workflow DEEPMODELOPTIM {
     // Now the data config will not work if passed in full
     // We need to pass in the split data config, any of them, for the predict modules
     // This will be changed in the future
+    ENCODE_CSV(
+        prediction_data,
+        TUNE_WF.out.data_config_tmp.first()
+    )
+    prediction_data = ENCODE_CSV.out.encoded
     prediction_data = prediction_data.combine(TUNE_WF.out.data_config_tmp.first().map{meta,file -> file})
     EVALUATION_WF(
         TUNE_WF.out.model_tmp,

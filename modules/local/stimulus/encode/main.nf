@@ -1,4 +1,4 @@
-process CHECK_MODEL {
+process ENCODE_CSV {
 
     tag "${meta.id}"
     label 'process_medium'
@@ -6,23 +6,21 @@ process CHECK_MODEL {
     container "docker.io/mathysgrapotte/stimulus-py:dev"
 
     input:
-    tuple val(meta), path(data_config)
-    tuple val(meta2), path(data)
-    tuple val(meta3), path(model)
-    tuple val(meta4), path(model_config)
-    tuple val(meta5), path(initial_weights)
+    tuple val(meta), path(data)
+    tuple val(meta2), path(config)
 
     output:
-    stdout emit: standardout
+    tuple val(meta2), path("${prefix}_encoded"), emit: encoded
+    path "versions.yml"          , emit: versions
 
     script:
     def args = task.ext.args ?: ''
+    prefix = task.ext.prefix ?: "${meta.split_id}-${meta2.transform_id}"
     """
-    stimulus check-model \
+    stimulus encode-csv \
         -d ${data} \
-        -m ${model} \
-        -c ${model_config} \
-        -r "\${PWD}" \
+        -y ${config} \
+        -o ${prefix}_encoded \
         $args
 
     cat <<-END_VERSIONS > versions.yml

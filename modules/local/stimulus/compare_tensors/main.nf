@@ -1,5 +1,5 @@
 process STIMULUS_COMPARE_TENSORS {
-    tag "${meta.id}"
+    tag "${meta.id1}"
     label 'process_medium'
     container "docker.io/mathysgrapotte/stimulus-py:dev"
 

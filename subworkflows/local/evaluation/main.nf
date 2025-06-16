@@ -28,10 +28,9 @@ workflow EVALUATION_WF {
     // Evaluation mode 1: Predict the data using the best model
     // and then compare the predictions of 2 different models
     //
-
     STIMULUS_PREDICT(
         model,
-        ch_data.collect()
+        ch_data.first() // converts a queue channel to a value channel
     )
     ch_versions = ch_versions.mix(STIMULUS_PREDICT.out.versions)
     predictions = STIMULUS_PREDICT.out.predictions
