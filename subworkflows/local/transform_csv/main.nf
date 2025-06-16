@@ -5,6 +5,7 @@
 */
 
 include { STIMULUS_TRANSFORM_CSV } from '../../../modules/local/stimulus/transform_csv'
+include { ENCODE_CSV } from '../../../modules/local/stimulus/encode'
 
 /*
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -48,17 +49,23 @@ workflow TRANSFORM_CSV_WF {
             config:
             [meta, config]
         }
-
     // run stimulus transform
     STIMULUS_TRANSFORM_CSV(
         ch_input.data,
         ch_input.config
     )
     ch_transformed_data = STIMULUS_TRANSFORM_CSV.out.transformed_data
-    ch_versions = ch_versions.mix(STIMULUS_TRANSFORM_CSV.out.versions)
+
+    // run stimulus encode
+    ENCODE_CSV(
+        ch_transformed_data,
+        ch_input.config
+    )
+    ch_encoded_data = ENCODE_CSV.out.encoded
+    ch_versions = ch_versions.mix(ENCODE_CSV.out.versions)
 
     emit:
-    transformed_data = ch_transformed_data
+    transformed_data = ch_encoded_data
     versions = ch_versions // channel: [ versions.yml ]
 }
 

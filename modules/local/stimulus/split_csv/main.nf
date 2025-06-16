@@ -10,7 +10,7 @@ process STIMULUS_SPLIT_DATA {
     tuple val(meta2), path(sub_config)
 
     output:
-    tuple val(meta2), path("${prefix}.csv"), emit: csv_with_split
+    tuple val(meta2), path("${prefix}_split"), emit: csv_with_split
     path "versions.yml"          , emit: versions
 
     script:
@@ -19,7 +19,7 @@ process STIMULUS_SPLIT_DATA {
     stimulus split-csv \
         -c ${data} \
         -y ${sub_config} \
-        -o ${prefix}.csv
+        -o ${prefix}_split
 
     cat <<-END_VERSIONS > versions.yml
     "${task.process}":
@@ -30,7 +30,7 @@ process STIMULUS_SPLIT_DATA {
     stub:
     prefix = task.ext.prefix ?: "${meta.id}-split-${meta2.id}"
     """
-    touch ${prefix}.csv
+    touch ${prefix}_split
 
     cat <<-END_VERSIONS > versions.yml
     "${task.process}":

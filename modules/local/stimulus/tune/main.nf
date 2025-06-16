@@ -25,7 +25,6 @@ process STIMULUS_TUNE {
     stimulus tune \
         -d ${transformed_data} \
         -m ${model} \
-        -e ${data_sub_config} \
         -c ${model_config} \
         -o ${prefix}-best-model.safetensors \
         -bo ${prefix}-best-optimizer.opt \

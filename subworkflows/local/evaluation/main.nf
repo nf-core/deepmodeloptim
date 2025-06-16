@@ -28,10 +28,9 @@ workflow EVALUATION_WF {
     // Evaluation mode 1: Predict the data using the best model
     // and then compare the predictions of 2 different models
     //
-
     STIMULUS_PREDICT(
         model,
-        ch_data.collect()
+        ch_data.first() // converts a queue channel to a value channel
     )
     ch_versions = ch_versions.mix(STIMULUS_PREDICT.out.versions)
     predictions = STIMULUS_PREDICT.out.predictions
@@ -41,26 +40,42 @@ workflow EVALUATION_WF {
     // and the same number of trials, we can estimate the noise across replicates
     // This is done by comparing the predictions of the alternative models between each other
     // and then calculatin a summary metric over them (e.g. mean, median, std, etc.)
-
-    replicate_predictions = predictions.map{
-                meta, prediction ->
-                    [["id": meta.id,
-                    "split_id": meta.split_id,
-                    "transform_id": meta.transform_id,
-                    "n_trials": meta.n_trials ], meta, prediction]
-            }.groupTuple(by:0)
-            .map{
-                merging_meta, metas, predictions ->
-                    [merging_meta, predictions]
+    pairs = predictions
+        .collate(2)
+        .collect()
+        .map { items ->
+            def pairs = []
+            // Create all unique combinations using index comparison
+            (0..<items.size()).each { i ->
+                (i+1..<items.size()).each { j ->
+                    def meta1 = items[i][0]
+                    def meta2 = items[j][0]
+                    def files = [items[i][1], items[j][1]]
+                    // Only compare different transforms OR different replicates
+                    if(meta1.transform_id != meta2.transform_id || meta1.replicate != meta2.replicate) {
+                        pairs << [
+                            [
+                                "id1": meta1.id,
+                                "id2": meta2.id,
+                                "split_id1": meta1.split_id,
+                                "split_id2": meta2.split_id,
+                                "transform_id1": meta1.transform_id,
+                                "transform_id2": meta2.transform_id,
+                                "replicate1": meta1.replicate,
+                                "replicate2": meta2.replicate
+                            ],
+                            // Create unique filenames using both transforms and replicates
+                            files
+                        ]
+                    }
+                }
             }
-
-    // check if the predictions are at least 2, meta,predictions
-    replicate_predictions.filter{
-        it[1].size() > 1
-    }.set{ replicate_predictions }
+            pairs
+        }
+        .flatMap { it }
 
     STIMULUS_COMPARE_TENSORS_COSINE(
-        replicate_predictions
+        pairs
     )
 
     cosine_scores = STIMULUS_COMPARE_TENSORS_COSINE.out.csv
