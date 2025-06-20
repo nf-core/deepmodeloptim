@@ -21,24 +21,10 @@
 
 ## Introduction
 
-**nf-core/deepmodeloptim** is a bioinformatics end-to-end pipeline designed to facilitate the testing and development of deep learning models for genomics.
+**nf-core/deepmodeloptim** augments your bio data towards an optimal task-specific training set. 
 
-Deep learning model development in natural science is an empirical and costly process. Despite the existence of generic tools for the tuning of hyperparameters and the training of the models, the connection between these procedures and the impact coming from the data is often underlooked, or at least not easily automatized. Indeed, researchers must define a pre-processing pipeline, an architecture, find the best parameters for said architecture and iterate over this process, often manually.
+Methods in deep learning are vastly equivalent (see neural scaling laws paper), most of the performance is driven by the training data. 
 
-Leveraging the power of Nextflow (polyglotism, container integration, scalable on the cloud), this pipeline will help users to 1) automatize the testing of the model, 2) gain useful insights with respect to the learning behaviour of the model, and hence 3) accelerate the development.
-
-## Pipeline summary
-
-It takes as input:
-
-- A dataset
-- A configuration file to describe the data pre-processing steps to be performed
-- An user defined PyTorch model
-- A configuration file describing the range of parameters for the PyTorch model
-
-It then transforms the data according to all possible pre-processing steps, finds the best architecture parameters for each of the transformed datasets, performs sanity checks on the models and train a minimal deep learning version for each dataset/architecture.
-
-Those experiments are then compiled into an intuitive report, making it easier for scientists to pick the best design choice to be sent to large scale training.
 
 <picture>
   <source media="(prefers-color-scheme: dark)" srcset="assets/metromap.png">

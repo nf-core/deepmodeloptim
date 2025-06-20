@@ -4,7 +4,7 @@ process STIMULUS_TUNE {
     container "docker.io/mathysgrapotte/stimulus-py:dev"
 
     input:
-    tuple val(meta), path(transformed_data), path(data_sub_config)
+    tuple val(meta), path(transformed_data)
     tuple val(meta2), path(model), path(model_config), path(initial_weights)
 
     output:
@@ -15,7 +15,6 @@ process STIMULUS_TUNE {
     path "versions.yml"                                               , emit: versions
     // now we need to output these in this format for the predict module - thiw will have to be changed!
     tuple val(meta), path(model), path("best_config.json"), path("${prefix}-best-model.safetensors"), emit: model_tmp
-    tuple val(meta), path(data_sub_config)                                                          , emit: data_config_tmp
 
     script:
     prefix = task.ext.prefix ?: meta.id

@@ -5,7 +5,7 @@ process STIMULUS_PREDICT {
 
     input:
     tuple val(meta) , path(model), path(model_config), path(weigths)
-    tuple val(meta2), path(data), path(config)
+    tuple val(meta2), path(data)
 
     output:
     tuple val(meta), path("${prefix}-pred.safetensors"), emit: predictions

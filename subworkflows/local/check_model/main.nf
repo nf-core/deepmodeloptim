@@ -17,7 +17,6 @@ workflow CHECK_MODEL_WF {
 
     take:
     ch_data
-    ch_data_config
     ch_model
     ch_model_config
     ch_initial_weights
@@ -27,7 +26,6 @@ workflow CHECK_MODEL_WF {
     ch_versions = Channel.empty()
 
     CHECK_MODEL(
-        ch_data_config,
         ch_data,
         ch_model,
         ch_model_config,

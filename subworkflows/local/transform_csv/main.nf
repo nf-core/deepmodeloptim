@@ -18,6 +18,7 @@ workflow TRANSFORM_CSV_WF {
     take:
     ch_split_data
     ch_config_transform
+    ch_config_encode
 
     main:
 
@@ -33,22 +34,19 @@ workflow TRANSFORM_CSV_WF {
 
     // combine data vs configs based on common key: split_id
     ch_input = ch_split_data
-        .map { meta, data ->
-            [[split_id: meta.split_id], meta, data]
-        }
-        .combine(
-            ch_config_transform.map { meta, config ->
-                [[split_id: meta.split_id], meta, config]
-            }
-            ,by: 0
-        )
-        .multiMap{ key, meta_data, data, meta_config, config ->
+        .combine(ch_config_transform, by: [])
+        .map { meta_data, data, meta_config, config ->
             def meta = meta_data + [transform_id: meta_config.transform_id]
-            data:
-            [meta, data]
-            config:
-            [meta, config]
+            [
+                data: [meta, data],
+                config: [meta, config]
+            ]
         }
+        .multiMap { item ->
+            data: item.data
+            config: item.config
+        }
+    
     // run stimulus transform
     STIMULUS_TRANSFORM_CSV(
         ch_input.data,
@@ -56,10 +54,25 @@ workflow TRANSFORM_CSV_WF {
     )
     ch_transformed_data = STIMULUS_TRANSFORM_CSV.out.transformed_data
 
+    ch_encode_input = ch_transformed_data
+        .combine(ch_config_encode, by: [])
+        .map { meta_data, data, meta_config, config ->
+            def meta = meta_data + [encode_id: meta_config.encode_id]
+            [
+                data: [meta, data],
+                config: [meta, config]
+            ]
+        }
+        .multiMap { item ->
+            data: item.data
+            config: item.config
+        }
+
+
     // run stimulus encode
     ENCODE_CSV(
-        ch_transformed_data,
-        ch_input.config
+        ch_encode_input.data,
+        ch_encode_input.config
     )
     ch_encoded_data = ENCODE_CSV.out.encoded
     ch_versions = ch_versions.mix(ENCODE_CSV.out.versions)

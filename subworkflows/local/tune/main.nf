@@ -16,7 +16,6 @@ include { CUSTOM_MODIFY_MODEL_CONFIG } from '../../../modules/local/custom/modif
 workflow TUNE_WF {
     take:
     ch_transformed_data
-    ch_yaml_sub_config
     ch_model
     ch_model_config
     ch_initial_weights
@@ -38,28 +37,33 @@ workflow TUNE_WF {
     ch_versions = ch_versions.mix(CUSTOM_MODIFY_MODEL_CONFIG.out.versions)
     ch_model_config = CUSTOM_MODIFY_MODEL_CONFIG.out.config
 
+    // ch_input = ch_split_data
+    //     .combine(ch_config_transform, by: [])
+    //     .map { meta_data, data, meta_config, config ->
+    //         def meta = meta_data + [transform_id: meta_config.transform_id]
+    //         [
+    //             data: [meta, data],
+    //             config: [meta, config]
+    //         ]
+    //     }
+    //     .multiMap { item ->
+    //         data: item.data
+    //         config: item.config
+    //     }
+
+    // ch_transformed_data.view()
     ch_tune_input = ch_transformed_data
-        .map { meta, data ->
-            [[split_id: meta.split_id, transform_id: meta.transform_id], meta, data]
-        }
-        .combine(
-            ch_yaml_sub_config.map { meta, config ->
-                [[split_id: meta.split_id, transform_id: meta.transform_id], config]
-            }
-            ,by: 0
-        )
         .combine(ch_model.map{it[1]})
         .combine(ch_model_config)
         .combine(ch_initial_weights)    // when initial_weights is empty .map{it[1]} will return [], and not properly combined
         .combine(tune_replicates)
-        .multiMap { key, meta, data, data_config, model, meta_model_config, model_config, meta_weights, initial_weights, n_replicate ->
+        .multiMap { meta, data, model, meta_model_config, model_config, meta_weights, initial_weights, n_replicate ->
             def meta_new = meta + [replicate: n_replicate] + [n_trials: meta_model_config.n_trials]
             data:
-                [meta_new, data, data_config]
+                [meta_new, data]
             model:
                 [meta_new, model, model_config, initial_weights]
         }
-
     // run stimulus tune
     STIMULUS_TUNE(
         ch_tune_input.data,
@@ -78,7 +82,6 @@ workflow TUNE_WF {
     versions = ch_versions // channel: [ versions.yml ]
     // these are temporaly needed for predict, it will be changed in the future!
     model_tmp = STIMULUS_TUNE.out.model_tmp
-    data_config_tmp = STIMULUS_TUNE.out.data_config_tmp
 }
 
 /*
