@@ -19,3 +19,5 @@ bin/.vscode/
 .nf-test/
 prototype/
 *.ipynb
+CLAUDE.md
+.claude

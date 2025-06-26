@@ -20,7 +20,11 @@ process CUSTOM_MODIFY_MODEL_CONFIG {
     meta_updated = meta + ["n_trials": "${n_trials}"]
     """
     # substitte the line containing n_trials in the config file with n_trials: \${n_trials}
-    awk -v n_trials=${n_trials} '/n_trials: [0-9]+/ {gsub(/n_trials: [0-9]+/, "n_trials: " n_trials)}1' ${config} > ${prefix}.yaml
+    if [ "${n_trials}" = "[]" ]; then
+        cp "${config}" "${prefix}.yaml"
+    else
+        awk -v n_trials="${n_trials}" '/n_trials: [0-9]+/ {gsub(/n_trials: [0-9]+/, "n_trials: " n_trials)}1' "${config}" > "${prefix}.yaml"
+    fi
 
     cat <<-END_VERSIONS > versions.yml
     "${task.process}":

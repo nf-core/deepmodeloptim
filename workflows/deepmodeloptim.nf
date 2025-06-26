@@ -10,8 +10,7 @@ include { softwareVersionsToYAML              } from '../subworkflows/nf-core/ut
 include { methodsDescriptionText              } from '../subworkflows/local/utils_nfcore_deepmodeloptim_pipeline'
 include { CHECK_MODEL_WF                      } from '../subworkflows/local/check_model'
 include { PREPROCESS_IBIS_BEDFILE_TO_STIMULUS } from '../subworkflows/local/preprocess_ibis_bedfile_to_stimulus'
-include { SPLIT_DATA_CONFIG_SPLIT_WF          } from '../subworkflows/local/split_data_config_split'
-include { SPLIT_DATA_CONFIG_TRANSFORM_WF      } from '../subworkflows/local/split_data_config_transform'
+include { SPLIT_DATA_CONFIG_UNIFIED_WF        } from '../subworkflows/local/split_data_config_unified'
 include { SPLIT_CSV_WF                        } from '../subworkflows/local/split_csv'
 include { TRANSFORM_CSV_WF                    } from '../subworkflows/local/transform_csv'
 include { TUNE_WF                             } from '../subworkflows/local/tune'
@@ -72,11 +71,13 @@ workflow DEEPMODELOPTIM {
     }
 
     // ==============================================================================
-    // split meta yaml split config file into individual yaml files
+    // split meta yaml config file into individual component yaml files
     // ==============================================================================
 
-    SPLIT_DATA_CONFIG_SPLIT_WF( ch_data_config )
-    ch_yaml_sub_config_split = SPLIT_DATA_CONFIG_SPLIT_WF.out.sub_config
+    SPLIT_DATA_CONFIG_UNIFIED_WF( ch_data_config )
+    ch_yaml_split_config = SPLIT_DATA_CONFIG_UNIFIED_WF.out.split_config
+    ch_yaml_transform_config = SPLIT_DATA_CONFIG_UNIFIED_WF.out.transform_config
+    ch_yaml_encode_config = SPLIT_DATA_CONFIG_UNIFIED_WF.out.encode_config
 
     // ==============================================================================
     // split csv data file
@@ -84,16 +85,9 @@ workflow DEEPMODELOPTIM {
 
     SPLIT_CSV_WF(
         ch_data,
-        ch_yaml_sub_config_split
+        ch_yaml_split_config
     )
     ch_split_data = SPLIT_CSV_WF.out.split_data
-
-    // ==============================================================================
-    // split meta yaml transform config file into individual yaml files
-    // ==============================================================================
-
-    SPLIT_DATA_CONFIG_TRANSFORM_WF( ch_yaml_sub_config_split )
-    ch_yaml_sub_config = SPLIT_DATA_CONFIG_TRANSFORM_WF.out.sub_config
 
     // ==============================================================================
     // transform csv file
@@ -101,7 +95,8 @@ workflow DEEPMODELOPTIM {
 
     TRANSFORM_CSV_WF(
         ch_split_data,
-        ch_yaml_sub_config
+        ch_yaml_transform_config,
+        ch_yaml_encode_config
     )
     ch_transformed_data = TRANSFORM_CSV_WF.out.transformed_data
 
@@ -115,11 +110,9 @@ workflow DEEPMODELOPTIM {
     // we sort the channel so that we always get the same input, as the default order
     // of the channel depends on which process finishes first (run in parallel)
     ch_check_input_data = ch_transformed_data.toSortedList().flatten().buffer(size:2).first()
-    ch_check_input_config = ch_yaml_sub_config.toSortedList().flatten().buffer(size:2).first()
 
     CHECK_MODEL_WF (
         ch_check_input_data,
-        ch_check_input_config,
         ch_model,
         ch_model_config,
         ch_initial_weights
@@ -135,7 +128,6 @@ workflow DEEPMODELOPTIM {
 
     TUNE_WF(
         ch_transformed_data,
-        ch_yaml_sub_config,
         ch_model,
         ch_model_config,
         ch_initial_weights,
@@ -147,15 +139,11 @@ workflow DEEPMODELOPTIM {
     // Evaluation
     // ==============================================================================
 
-    // Now the data config will not work if passed in full
-    // We need to pass in the split data config, any of them, for the predict modules
-    // This will be changed in the future
     ENCODE_CSV(
         prediction_data,
-        TUNE_WF.out.data_config_tmp.first()
+        ch_yaml_encode_config
     )
     prediction_data = ENCODE_CSV.out.encoded
-    prediction_data = prediction_data.combine(TUNE_WF.out.data_config_tmp.first().map{meta,file -> file})
     EVALUATION_WF(
         TUNE_WF.out.model_tmp,
         prediction_data

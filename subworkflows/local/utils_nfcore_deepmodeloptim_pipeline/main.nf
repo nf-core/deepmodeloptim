@@ -110,12 +110,16 @@ workflow PIPELINE_INITIALISATION {
     //
 
     range = validate_range(params.tune_trials_range)
-    val_tune_trials_range = Channel.from(range)
-                                .map { rangeStr ->
-                                    def (min, max, step) = rangeStr.tokenize(',')*.toInteger()
-                                    (min..max).step(step).toList()
-                                }
-                                .flatten()
+    if (range) {
+        val_tune_trials_range = Channel.from(range)
+                                    .map { rangeStr ->
+                                        def (min, max, step) = rangeStr.tokenize(',')*.toInteger()
+                                        (min..max).step(step).toList()
+                                    }
+                                    .flatten()
+    } else {
+        val_tune_trials_range = []
+    }
     //
     // Create the channels for the number of replicates
     //
@@ -217,7 +221,7 @@ def validateInputSamplesheet(input) {
 def validate_range(range) {
 
     if (range == null) {
-        return "1,1,1"
+        return range
     }
     def (min, max, step) = range.tokenize(',')*.toInteger()
     if (min > max) {

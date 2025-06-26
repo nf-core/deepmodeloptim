@@ -6,11 +6,10 @@ process CHECK_MODEL {
     container "docker.io/mathysgrapotte/stimulus-py:dev"
 
     input:
-    tuple val(meta), path(data_config)
-    tuple val(meta2), path(data)
-    tuple val(meta3), path(model)
-    tuple val(meta4), path(model_config)
-    tuple val(meta5), path(initial_weights)
+    tuple val(meta1), path(data)
+    tuple val(meta2), path(model)
+    tuple val(meta3), path(model_config)
+    tuple val(meta4), path(initial_weights)
 
     output:
     stdout emit: standardout
