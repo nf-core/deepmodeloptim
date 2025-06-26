@@ -46,7 +46,7 @@ workflow TRANSFORM_CSV_WF {
             data: item.data
             config: item.config
         }
-    
+
     // run stimulus transform
     STIMULUS_TRANSFORM_CSV(
         ch_input.data,

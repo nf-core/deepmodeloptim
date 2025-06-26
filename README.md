@@ -21,10 +21,9 @@
 
 ## Introduction
 
-**nf-core/deepmodeloptim** augments your bio data towards an optimal task-specific training set. 
+**nf-core/deepmodeloptim** augments your bio data towards an optimal task-specific training set.
 
-Methods in deep learning are vastly equivalent (see neural scaling laws paper), most of the performance is driven by the training data. 
-
+Methods in deep learning are vastly equivalent (see neural scaling laws paper), most of the performance is driven by the training data.
 
 <picture>
   <source media="(prefers-color-scheme: dark)" srcset="assets/metromap.png">

@@ -26,13 +26,13 @@ workflow SPLIT_DATA_CONFIG_UNIFIED_WF {
     // Process split configs - transpose and add split_id to meta
     ch_split_configs = STIMULUS_SPLIT_YAML.out.split_config
         .transpose()
-        .map { meta, yaml -> 
+        .map { meta, yaml ->
             // Extract split info from descriptive filename
             def split_id = yaml.baseName.replaceAll(/.*_([^_]+_[^_]+)_split$/, '$1')
-            [ meta + [split_id: split_id], yaml] 
+            [ meta + [split_id: split_id], yaml]
         }
 
-    // Process transform configs - transpose and add transform_id to meta  
+    // Process transform configs - transpose and add transform_id to meta
     ch_transform_configs = STIMULUS_SPLIT_YAML.out.transform_config
         .transpose()
         .map { meta, yaml ->
