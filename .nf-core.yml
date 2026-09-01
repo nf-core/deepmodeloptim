@@ -7,6 +7,7 @@ lint:
     - conf/igenomes_ignored.config
     - assets/multiqc_config.yml
     - conf/test_full.config
+    - .github/workflows/linting_comment.yml
   files_unchanged:
     - .github/CONTRIBUTING.md
     - assets/sendmail_template.txt
@@ -15,10 +16,12 @@ lint:
     - assets/nf-core-deepmodeloptim_logo_light.png
     - docs/images/nf-core-deepmodeloptim_logo_light.png
     - docs/images/nf-core-deepmodeloptim_logo_dark.png
+    - .github/workflows/branch.yml
+    - .github/workflows/linting.yml
   multiqc_config: false
   nextflow_config:
     - params.input
-nf_core_version: 4.0.3
+nf_core_version: 4.1.0
 repository_type: pipeline
 template:
   author: Mathys Grapotte
